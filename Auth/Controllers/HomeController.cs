@@ -1,13 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using Auth.Models;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Mvc;
 
 namespace Auth.Controllers
 {
@@ -16,7 +7,7 @@ namespace Auth.Controllers
         public HomeController()
         {
         }
-        [Authorize(JwtBearerDefaults.AuthenticationScheme)]
+        [JWTAuthFilter]
         public IActionResult Secret()
         {
             return Content("Авторизованный пользователь.");

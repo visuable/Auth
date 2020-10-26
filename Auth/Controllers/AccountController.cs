@@ -2,10 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Auth.Controllers
 {
@@ -45,7 +42,7 @@ namespace Auth.Controllers
         {
             if (context.Users.Find(user.Login) == null)
             {
-                RedirectToAction("Register");
+                return RedirectToAction("Register");
             }
             string encoded = GenerateToken();
             return Json(encoded);
