@@ -1,6 +1,8 @@
 ﻿using Auth.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Primitives;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.Net.Http.Headers;
 using System;
 using System.IdentityModel.Tokens.Jwt;
 
@@ -26,7 +28,7 @@ namespace Auth.Controllers
             {
                 contextUser.Role = "user";
                 contextUser.Login = user.Login;
-                contextUser.Password = user.Password;
+                contextUser.Password = Encrypts.EncryptPassword(user.Password);
                 context.Users.Add(contextUser);
             }
             context.SaveChanges();
@@ -40,25 +42,17 @@ namespace Auth.Controllers
         [HttpPost]
         public IActionResult Login(ViewUser user)
         {
-            if (context.Users.Find(user.Login) == null)
+            var dbUser = context.Users.Find(user.Login);
+            if (dbUser == null)
             {
                 return RedirectToAction("Register");
             }
-            string encoded = GenerateToken();
-            return Json(encoded);
-        }
-
-        private string GenerateToken()
-        {
-            var token = new JwtSecurityToken(
-                            issuer: Settings.Issuer,
-                            audience: Settings.Audience,
-                            notBefore: DateTime.Now,
-                            expires: DateTime.Now.Add(TimeSpan.FromMinutes(Settings.Lifetime)),
-                            signingCredentials: new SigningCredentials(Settings.GetSymmetricKey(), SecurityAlgorithms.HmacSha256)
-                            );
-            var encoded = new JwtSecurityTokenHandler().WriteToken(token);
-            return encoded;
+            if (dbUser.Password == Encrypts.EncryptPassword(user.Password))
+            {
+                string encoded = Encrypts.GenerateToken();
+                return Json(encoded);
+            }
+            return Content("Неправильный пароль!");
         }
     }
 }

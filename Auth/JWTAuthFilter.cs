@@ -3,7 +3,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.IdentityModel.Tokens;
+using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
+using System.Security.Claims;
 
 namespace Auth
 {
@@ -11,18 +14,12 @@ namespace Auth
     {
         public void OnAuthorization(AuthorizationFilterContext context)
         {
-            context.HttpContext.Request.Headers.TryGetValue("Authorization", out var values);
-            string token = "";
-            // Временно.
-            var vals = values.ToString().Split(' ');
-            if (vals[0] == JwtBearerDefaults.AuthenticationScheme)
-            {
-                token = vals[1];
-            }
-            if (token == string.Empty)
+            var token = context.HttpContext.Request.Headers["Authorization"];
+            var typeAuth = token.ToArray()[0];
+            if(typeAuth != "Bearer" || token == string.Empty)
             {
                 context.Result = new UnauthorizedResult();
-
+                return;
             }
             else
             {
