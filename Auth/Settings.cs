@@ -15,5 +15,9 @@ namespace Auth
         {
             return new SymmetricSecurityKey(Encoding.Unicode.GetBytes(SecretKey));
         }
+        public enum Roles
+        {
+            User
+        }
     }
 }
