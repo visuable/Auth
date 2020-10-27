@@ -26,15 +26,24 @@ namespace Auth
             var encoded = new JwtSecurityTokenHandler().WriteToken(token);
             return encoded;
         }
-        public static string EncryptPassword(string pass)
+        public static string EncryptPassword(string pass, string salt)
         {
             string hashed = Convert.ToBase64String(KeyDerivation.Pbkdf2(
                 password: pass,
-                salt: Encoding.Unicode.GetBytes(Salt),
+                salt: Convert.FromBase64String(salt),
                 prf: KeyDerivationPrf.HMACSHA1,
                 iterationCount: 10000,
                 numBytesRequested: 256 / 8));
             return hashed;
+        }
+        public static string GenerateSalt()
+        {
+            var salt = new byte[128 / 8];
+            using (var rng = RandomNumberGenerator.Create())
+            {
+                rng.GetBytes(salt);
+            }
+            return Convert.ToBase64String(salt);
         }
     }
 }

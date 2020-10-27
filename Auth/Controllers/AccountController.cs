@@ -28,7 +28,8 @@ namespace Auth.Controllers
             {
                 contextUser.Role = "user";
                 contextUser.Login = user.Login;
-                contextUser.Password = Encrypts.EncryptPassword(user.Password);
+                contextUser.Salt = Encrypts.GenerateSalt();
+                contextUser.Password = Encrypts.EncryptPassword(user.Password, contextUser.Salt);
                 context.Users.Add(contextUser);
             }
             context.SaveChanges();
@@ -47,7 +48,7 @@ namespace Auth.Controllers
             {
                 return RedirectToAction("Register");
             }
-            if (dbUser.Password == Encrypts.EncryptPassword(user.Password))
+            if (dbUser.Password == Encrypts.EncryptPassword(user.Password, dbUser.Salt))
             {
                 string encoded = Encrypts.GenerateToken();
                 return Json(encoded);
