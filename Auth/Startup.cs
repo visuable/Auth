@@ -22,6 +22,7 @@ namespace Auth
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
+            services.AddHttpClient<ThrottledHttpClient>();
             services.AddScoped<IAccountManager, DatabaseAccountManager>();
             services.AddDbContext<AppContext>(x => x.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 

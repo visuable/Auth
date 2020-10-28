@@ -1,16 +1,27 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace Auth.Controllers
 {
     public class HomeController : Controller
     {
-        public HomeController()
+        private ThrottledHttpClient client;
+        public HomeController(ThrottledHttpClient client)
         {
+            this.client = client;
         }
-        [JWTAuthFilter]
-        public IActionResult Secret()
+        [HttpGet]
+        public async Task SendRequest()
         {
-            return Content("Авторизованный пользователь.");
+            for (var i = 0; i < 100; i++)
+            {
+                await client.PostAsync(new HttpRequestMessage()
+                {
+                    RequestUri = new System.Uri("https://yandex.ru")
+                });
+            }
+            return;
         }
     }
 }
