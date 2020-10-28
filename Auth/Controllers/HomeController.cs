@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -6,28 +7,28 @@ namespace Auth.Controllers
 {
     public class HomeController : Controller
     {
-        private IHttpClientFactory _clientFactory;
-        public HomeController(IHttpClientFactory clientFactory)
+        private ThrottledHttpClient client;
+        public HomeController(ThrottledHttpClient client)
         {
-            _clientFactory = clientFactory;
+            this.client = client;
         }
         public void Index()
         {
 
         }
         [HttpGet]
-        public async void SendRequest()
+        public async Task<IActionResult> SendRequest()
         {
-            var client = _clientFactory.CreateClient("ContextClient");
-            var thClient = new ThrottledHttpClient(client);
-            for (var i = 0; i < 100; i++)
+            //var client = _clientFactory.CreateClient("ContextClient");
+            var resp = new List<HttpResponseMessage>();
+            for (var i = 0; i < 5; i++)
             {
-               await thClient.PostAsync(new HttpRequestMessage()
+               resp.Add(await client.PostAsync(new HttpRequestMessage()
                {
                  RequestUri = new System.Uri("https://yandex.ru")
-               });
+               }));
             }
-            return;
+            return Json(resp);
         }
     }
 }

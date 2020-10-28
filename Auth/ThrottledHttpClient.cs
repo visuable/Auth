@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -9,18 +11,26 @@ namespace Auth
 {
     public class ThrottledHttpClient
     {
-        private HttpClient client;
-        public ThrottledHttpClient(HttpClient client)
+        private IHttpClientFactory factory;
+        private IConfiguration _configuration;
+        public ThrottledHttpClient(IHttpClientFactory factory, IConfiguration configuration)
         {
-            this.client = client;
+            this.factory = factory;
+            _configuration = configuration;
+            var sett = int.Parse(_configuration["ThrottledClientSettings:RequeriesLimit"]);
+            semaphore = new SemaphoreSlim(sett, sett);
+            client = this.factory.CreateClient("Client");
+            delay = int.Parse(_configuration["ThrottledClientSettings:Delay"]);
         }
 
-        private static SemaphoreSlim semaphore = new SemaphoreSlim(10, 10);
+        private static SemaphoreSlim semaphore;
+        private static HttpClient client;
+        private static int delay;
         public async Task<HttpResponseMessage> PostAsync(HttpRequestMessage message)
         {
             await semaphore.WaitAsync();
             var task = client.SendAsync(message);
-            await Task.Delay(TimeSpan.FromSeconds(5));
+            await Task.Delay(TimeSpan.FromSeconds(delay));
             semaphore.Release();
             return await task;
         }
