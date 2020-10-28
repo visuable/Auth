@@ -6,20 +6,26 @@ namespace Auth.Controllers
 {
     public class HomeController : Controller
     {
-        private ThrottledHttpClient client;
-        public HomeController(ThrottledHttpClient client)
+        private IHttpClientFactory _clientFactory;
+        public HomeController(IHttpClientFactory clientFactory)
         {
-            this.client = client;
+            _clientFactory = clientFactory;
+        }
+        public void Index()
+        {
+
         }
         [HttpGet]
-        public async Task SendRequest()
+        public async void SendRequest()
         {
+            var client = _clientFactory.CreateClient("ContextClient");
+            var thClient = new ThrottledHttpClient(client);
             for (var i = 0; i < 100; i++)
             {
-                await client.PostAsync(new HttpRequestMessage()
-                {
-                    RequestUri = new System.Uri("https://yandex.ru")
-                });
+               await thClient.PostAsync(new HttpRequestMessage()
+               {
+                 RequestUri = new System.Uri("https://yandex.ru")
+               });
             }
             return;
         }

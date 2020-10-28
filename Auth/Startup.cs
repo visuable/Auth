@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using System.Net.Http;
 
 namespace Auth
 {
@@ -22,7 +23,7 @@ namespace Auth
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
-            services.AddHttpClient<ThrottledHttpClient>();
+            services.AddHttpClient<HttpClient>("ContextClient");
             services.AddScoped<IAccountManager, DatabaseAccountManager>();
             services.AddDbContext<AppContext>(x => x.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
